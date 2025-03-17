@@ -1,4 +1,7 @@
 use std::io;
+use std::process::Command;
+use std::time::Instant;
+use std::time::Duration;
 
 fn ask_entry(question: &str) -> String{
     let mut input = String::new(); // variable qui stocke l'entrée utilisateur
@@ -34,7 +37,33 @@ fn main() {
     */
     let command:String = ask_entry("Entrez la commande à analyser: ");
     let nombre_tests:i32 = ask_int("Combien de lancement faire (Plus le nombre de test sera élevé, plus les vérifications seront précises): ");
-    
-    println!("Commande: {}", command);
-    println!("Nombre de tests: {}", nombre_tests);
+
+    let mut total_execution: Vec<Duration> = Vec::new(); // créer tableau de taille variable
+
+    let mut i:i32 = 0;
+    while i <= nombre_tests{
+        // démare le chrono
+        let start = Instant::now();
+
+        let exec = Command::new("sh")
+            .arg("-c")
+            .arg(&command)
+            .output()
+            .expect("Echec de la commande veuillez vérifier votre input");
+        
+        i += 1;
+
+        // arrete le chrono
+        let duration = start.elapsed();
+        total_execution.push(duration);
+    }
+
+    println!("{:?}", total_execution);
+
+    /*println!(
+        "Temps total: {}s {}ms ({}µs)",
+        duration.as_secs(),
+        duration.subsec_millis(),
+        duration.subsec_micros()
+    );*/
 }
