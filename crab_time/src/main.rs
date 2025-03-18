@@ -1,6 +1,8 @@
 use std::io;
 use std::process::Command;
 use std::time::{Instant, Duration};
+use std::fs::OpenOptions;
+use std::io::Write;
 
 fn ask_entry(question: &str) -> String {
     let mut input = String::new(); // variable qui stocke l'entrée utilisateur
@@ -30,32 +32,39 @@ fn main() {
 
     let mut total_execution: Vec<Duration> = Vec::new(); // Créer tableau de taille variable
 
-    // Crée l'objet Command avant la boucle
-    let mut command_exec = Command::new("sh");
-
-    // Ajoute les arguments à l'objet Command
-    command_exec.arg("-c").arg(&command);
-
     let mut i: i32 = 0;
     while i < nombre_tests {
         // Démarre le chrono
         let start = Instant::now();
 
-        // Exécute la commande
-        let _ = command_exec.output().expect("Echec de la commande veuillez vérifier votre input");
+        // Recréer `Command` à chaque itération
+        let _ = Command::new("sh")
+            .arg("-c")
+            .arg(&command)
+            .output()
+            .expect("Echec de la commande, veuillez vérifier votre input");
 
         // Arrête le chrono
         let duration = start.elapsed();
 
-        // Incrémente le nombre de tests
         i += 1;
-
-        // Ajoute la durée d'exécution dans le tableau après 50 tests
-        if i > 50 {
-            total_execution.push(duration);
-        }
+        total_execution.push(duration);
     }
 
     // Affiche les durées d'exécution
     println!("{:?}", total_execution);
+
+    let mut data_file = OpenOptions::new()
+        .write(true)
+        .create(true)
+        .truncate(true)
+        .open("data.txt")
+        .expect("cannot open file");
+    
+    for duration in &total_execution{
+        let duration_str = format!("{:?}\n", duration);
+        data_file
+            .write_all(duration_str.as_bytes()) // Convertir en &[u8]
+            .expect("write failed");
+    }
 }
