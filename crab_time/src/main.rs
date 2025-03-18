@@ -67,4 +67,23 @@ fn main() {
             .write_all(duration_str.as_bytes()) // Convertir en &[u8]
             .expect("write failed");
     }
+
+    /*
+    Donner la moyenne
+    */
+    let mut moyenne:f64 = 0.0;
+    let mut diviseur:f64 = 0.0;
+    for duration in &total_execution{
+        let millis = duration.as_secs() * 1_000 + u64::from(duration.subsec_millis()); // secondes * 1000 + millisecondes
+        let fraction = duration.subsec_nanos() as f64 / 1_000_000.0; // fractions de millisecondes (en nanosecondes)
+
+        let result = millis as f64 + fraction;
+        
+        diviseur += 1.0;
+
+        moyenne += result;
+    }
+    println!("{}", moyenne);
+
+    println!("Resultat: {}", moyenne/diviseur);
 }
